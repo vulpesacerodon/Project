@@ -6,7 +6,7 @@ input wr, rd;
 output full, empty;
 output [3:0] full, empty;
 output [3:0] w_addr, r_addr;
-reg [3:0] w_addr, r_Addr;
+reg    [3:0] w_addr, r_Addr;
 
 always @ (posedge clk)
 	begin
