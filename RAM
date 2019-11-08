@@ -34,3 +34,5 @@ ram_reg <= memory[r_addr];
 end
 
 assign dout = (~we && oe) ? ram_reg : 8'hzz;
+
+endmodule 
