@@ -7,10 +7,12 @@ reg             y;
 reg [1:0]  cs, ns;
 
 parameter
-  s0 = 2'b00;   //Reset state
-  s1 = 2'b01;   // write enable state
-  s2 = 2'b10;  //  read enable state
-  s3 = 2'b11;  //  error check state
+  s0 = 1'b0;   //Reset state
+  s1 = 1'b0;   // write enable state
+  s2 = 1'b0;  //  ready state
+  s3 = 1'b0;  //  init state
+  s4 = 1'b0; // Send State
+  s5 = 1'b0; // Clear State
 
 always @ (cs)
 begin
@@ -18,7 +20,9 @@ begin
     s0: y = 0;
     s1: y = 0;
     s2: y = 0;
-    s3: y = 1;
+    s3: y = 0;
+    s4: y = 0;
+    s5: y = 0;
     default y = 0;
   endcase
  end
@@ -27,17 +31,23 @@ begin
  begin
   case(cs)
     s0: if(x) ns = s1: //enable write
-        else  ns = s2; //enable read
+        else  ns = s0; //remain in reset state
         
-    s1: if(x) ns = s2;  //go to read enable
-        else  ns = s1;  //continue writing to memory
+    s1: if(x) ns = s2;  //go to ready enable state
+        else  ns = s1;  //remain in WE state
     
-    s2: if(x) ns = s2; //continue reading memory / error check / Call LCRC Module
-        else  ns = s0; //if all is good, go to reset state and purge packets
+    s2: if(x) ns = s3; //go to INIT state
+        else  ns = s2; //remain in READY state
      
-    s3: if(x) ns = s3;  // resend NAK packets
-        else  ns = s0;  // reset
-        
+    s3: if(x) ns = s4;  // go to SEND State
+        else  ns = s1;  // If error, go to WE state
+    
+    s4: if(x) ns = s5; // ACK/NAK
+        else ns =  s1; // back to WE State
+    
+    s5: if(x) ns = ; // ACK, back to WE  state
+        else ns =  ; // NAK, back to SEND state
+
     default ns = s0;
   endcase
  end
